@@ -1,6 +1,55 @@
 // ES6 version of the house representative service
 
+// Representative types with their descriptions
+export const REPRESENTATIVE_TYPES = {
+  GENERAL: {
+    id: 'general',
+    name: 'General Representative',
+    description: 'Handles general inquiries and basic support',
+    icon: '👥',
+  },
+  TECHNICAL: {
+    id: 'technical',
+    name: 'Technical Representative',
+    description: 'Specializes in technical issues and troubleshooting',
+    icon: '🔧',
+  },
+  SALES: {
+    id: 'sales',
+    name: 'Sales Representative',
+    description: 'Focuses on sales inquiries and product information',
+    icon: '💰',
+  },
+  SUPPORT: {
+    id: 'support',
+    name: 'Customer Support Representative',
+    description: 'Provides dedicated customer support and assistance',
+    icon: '💬',
+  },
+  SPECIALIST: {
+    id: 'specialist',
+    name: 'Specialist Representative',
+    description: 'Expert in specific areas or products',
+    icon: '🎯',
+  },
+};
+
 // Mock data for demonstration purposes
+const mockHouses = [
+  {
+    id: 'h1',
+    name: 'Main House',
+    address: '123 Main St, City, State',
+    representatives: ['1', '2'],
+  },
+  {
+    id: 'h2',
+    name: 'Branch House',
+    address: '456 Branch Ave, City, State',
+    representatives: ['3'],
+  },
+];
+
 const mockRepresentatives = [
   {
     id: '1',
@@ -11,6 +60,9 @@ const mockRepresentatives = [
     avatar: 'https://randomuser.me/api/portraits/men/1.jpg',
     isAvailable: true,
     assignedUsers: [],
+    houseId: 'h1',
+    type: REPRESENTATIVE_TYPES.GENERAL.id,
+    expertise: ['General Support', 'Basic Inquiries'],
   },
   {
     id: '2',
@@ -21,6 +73,9 @@ const mockRepresentatives = [
     avatar: 'https://randomuser.me/api/portraits/women/1.jpg',
     isAvailable: true,
     assignedUsers: [],
+    houseId: 'h1',
+    type: REPRESENTATIVE_TYPES.SUPPORT.id,
+    expertise: ['Customer Support', 'Problem Resolution'],
   },
   {
     id: '3',
@@ -31,6 +86,9 @@ const mockRepresentatives = [
     avatar: 'https://randomuser.me/api/portraits/men/2.jpg',
     isAvailable: false,
     assignedUsers: [],
+    houseId: 'h2',
+    type: REPRESENTATIVE_TYPES.TECHNICAL.id,
+    expertise: ['Technical Support', 'Troubleshooting'],
   },
 ];
 
@@ -56,20 +114,33 @@ const mockUsers = [
 ];
 
 /**
- * Service for managing house representatives and users
+ * Service for managing houses, representatives, and users
  */
 class HouseRepresentativeService {
   constructor() {
+    this.houses = [...mockHouses];
     this.representatives = [...mockRepresentatives];
     this.users = [...mockUsers];
   }
 
   /**
+   * Get all houses
+   * @returns {Array} - Array of houses
+   */
+  getHouses() {
+    return [...this.houses];
+  }
+
+  /**
    * Get all representatives
+   * @param {string} [houseId] - Optional house ID to filter representatives
    * @returns {Array} - Array of representatives
    */
-  getRepresentatives() {
-    return [...this.representatives];
+  getRepresentatives(houseId) {
+    if (houseId) {
+      return this.representatives.filter((rep) => rep.houseId === houseId);
+    }
+    return this.representatives;
   }
 
   /**
@@ -77,7 +148,85 @@ class HouseRepresentativeService {
    * @returns {Array} - Array of users
    */
   getUsers() {
-    return [...this.users];
+    return this.users;
+  }
+
+  /**
+   * Add a new house
+   * @param {Object} house - House object with name and address
+   * @returns {Object} - The created house
+   */
+  addHouse(house) {
+    const newHouse = {
+      id: `house-${Date.now()}`,
+      ...house,
+      representatives: [],
+    };
+    this.houses.push(newHouse);
+    return newHouse;
+  }
+
+  editHouse(houseId, updatedHouse) {
+    const index = this.houses.findIndex((h) => h.id === houseId);
+    if (index !== -1) {
+      this.houses[index] = {
+        ...this.houses[index],
+        ...updatedHouse,
+      };
+      return this.houses[index];
+    }
+    return null;
+  }
+
+  deleteHouse(houseId) {
+    const index = this.houses.findIndex((h) => h.id === houseId);
+    if (index !== -1) {
+      // Remove all representatives associated with this house
+      this.representatives = this.representatives.filter((rep) => rep.houseId !== houseId);
+      this.houses.splice(index, 1);
+      return true;
+    }
+    return false;
+  }
+
+  /**
+   * Add a new representative
+   * @param {Object} representative - Representative object
+   * @param {string} houseId - ID of the house to add the representative to
+   * @returns {Object} - The created representative
+   */
+  addRepresentative(representative, houseId) {
+    const newRepresentative = {
+      id: `rep-${Date.now()}`,
+      houseId,
+      assignedUsers: [],
+      isAvailable: true,
+      expertise: [],
+      ...representative,
+    };
+    this.representatives.push(newRepresentative);
+    return newRepresentative;
+  }
+
+  editRepresentative(representativeId, updatedRepresentative) {
+    const index = this.representatives.findIndex((r) => r.id === representativeId);
+    if (index !== -1) {
+      this.representatives[index] = {
+        ...this.representatives[index],
+        ...updatedRepresentative,
+      };
+      return this.representatives[index];
+    }
+    return null;
+  }
+
+  deleteRepresentative(representativeId) {
+    const index = this.representatives.findIndex((r) => r.id === representativeId);
+    if (index !== -1) {
+      this.representatives.splice(index, 1);
+      return true;
+    }
+    return false;
   }
 
   /**
@@ -87,24 +236,14 @@ class HouseRepresentativeService {
    * @returns {boolean} - Whether the assignment was successful
    */
   assignUserToRepresentative(userId, representativeId) {
-    const representative = this.representatives.find((rep) => rep.id === representativeId);
     const user = this.users.find((u) => u.id === userId);
+    const representative = this.representatives.find((r) => r.id === representativeId);
 
-    if (!representative || !user || !representative.isAvailable) {
-      return false;
+    if (user && representative) {
+      user.assignedTo = representativeId;
+      return true;
     }
-
-    // Check if user is already assigned to another representative
-    const currentAssignment = this.representatives.find((rep) =>
-      rep.assignedUsers.includes(userId),
-    );
-
-    if (currentAssignment) {
-      return false;
-    }
-
-    representative.assignedUsers.push(userId);
-    return true;
+    return false;
   }
 
   /**
@@ -113,16 +252,12 @@ class HouseRepresentativeService {
    * @returns {boolean} - Whether the removal was successful
    */
   removeUserFromRepresentative(userId) {
-    const representative = this.representatives.find((rep) =>
-      rep.assignedUsers.includes(userId),
-    );
-
-    if (!representative) {
-      return false;
+    const user = this.users.find((u) => u.id === userId);
+    if (user) {
+      user.assignedTo = null;
+      return true;
     }
-
-    representative.assignedUsers = representative.assignedUsers.filter((id) => id !== userId);
-    return true;
+    return false;
   }
 
   /**
@@ -131,14 +266,21 @@ class HouseRepresentativeService {
    * @returns {boolean} - Whether the toggle was successful
    */
   toggleRepresentativeAvailability(representativeId) {
-    const representative = this.representatives.find((rep) => rep.id === representativeId);
-
-    if (!representative) {
-      return false;
+    const representative = this.representatives.find((r) => r.id === representativeId);
+    if (representative) {
+      representative.isAvailable = !representative.isAvailable;
+      return true;
     }
+    return false;
+  }
 
-    representative.isAvailable = !representative.isAvailable;
-    return true;
+  /**
+   * Get representatives for a specific house
+   * @param {string} houseId - The ID of the house
+   * @returns {Array} - Array of representatives in the house
+   */
+  getHouseRepresentatives(houseId) {
+    return this.representatives.filter((rep) => rep.houseId === houseId);
   }
 }
 

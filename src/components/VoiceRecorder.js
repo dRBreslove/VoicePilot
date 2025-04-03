@@ -37,6 +37,27 @@ function VoiceRecorder({ representativeId, representativeName, userPhone }) {
   const mediaRecorderRef = useRef(null);
   const audioChunksRef = useRef([]);
 
+  const processAudio = async (audioBlob) => {
+    setIsProcessing(true);
+    try {
+      // Convert voice to text
+      const transcribedText = await voiceService.convertVoiceToText(audioBlob);
+      setTranscription(transcribedText);
+
+      // Generate summary
+      const conversationSummary = await voiceService.summarizeConversation(transcribedText);
+      setSummary(conversationSummary);
+
+      // Pre-fill WhatsApp message with summary
+      setWhatsappMessage(conversationSummary);
+    } catch (err) {
+      setError('Error processing audio. Please try again.');
+      console.error('Error processing audio:', err);
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
   const startRecording = async () => {
     try {
       setError('');
@@ -71,27 +92,6 @@ function VoiceRecorder({ representativeId, representativeName, userPhone }) {
     if (mediaRecorderRef.current && isRecording) {
       mediaRecorderRef.current.stop();
       setIsRecording(false);
-    }
-  };
-
-  const processAudio = async (audioBlob) => {
-    setIsProcessing(true);
-    try {
-      // Convert voice to text
-      const transcribedText = await voiceService.convertVoiceToText(audioBlob);
-      setTranscription(transcribedText);
-
-      // Generate summary
-      const conversationSummary = await voiceService.summarizeConversation(transcribedText);
-      setSummary(conversationSummary);
-
-      // Pre-fill WhatsApp message with summary
-      setWhatsappMessage(conversationSummary);
-    } catch (err) {
-      setError('Error processing audio. Please try again.');
-      console.error('Error processing audio:', err);
-    } finally {
-      setIsProcessing(false);
     }
   };
 

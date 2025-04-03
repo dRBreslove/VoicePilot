@@ -66,7 +66,7 @@ function CircleVisualization({ representativeId }) {
     try {
       const users = houseRepresentativeService.getUsers();
       setAvailableUsers(users);
-      
+
       const representatives = houseRepresentativeService.getRepresentatives()
         .filter((rep) => rep.id !== representativeId);
       setAvailableRepresentatives(representatives);
@@ -174,20 +174,20 @@ function CircleVisualization({ representativeId }) {
 
     const canvas = canvasRef.current;
     const ctx = canvas.getContext('2d');
-    
+
     // Clear canvas
     ctx.clearRect(0, 0, canvasSize.width, canvasSize.height);
-    
+
     // Set up drawing parameters
     const centerX = canvasSize.width / 2;
     const centerY = canvasSize.height / 2;
     const maxRadius = Math.min(centerX, centerY) * 0.8;
-    
+
     // Draw circles recursively
     const drawCircleHierarchy = (circle, level, index, total, parentX, parentY, parentRadius) => {
       // Calculate position
       let x, y, radius;
-      
+
       if (level === 0) {
         // Root level - draw in the center
         x = centerX;
@@ -201,11 +201,11 @@ function CircleVisualization({ representativeId }) {
         y = parentY + distance * Math.sin(angle);
         radius = parentRadius * 0.5;
       }
-      
+
       // Draw circle
       ctx.beginPath();
       ctx.arc(x, y, radius, 0, 2 * Math.PI);
-      
+
       // Set style based on selection
       if (selectedCircle && selectedCircle.id === circle.id) {
         ctx.fillStyle = 'rgba(25, 118, 210, 0.3)';
@@ -216,17 +216,17 @@ function CircleVisualization({ representativeId }) {
         ctx.strokeStyle = '#1976d2';
         ctx.lineWidth = 2;
       }
-      
+
       ctx.fill();
       ctx.stroke();
-      
+
       // Draw circle name
       ctx.fillStyle = '#000';
       ctx.font = '14px Arial';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
       ctx.fillText(circle.name, x, y);
-      
+
       // Draw sub-circles
       if (circle.subCircles && circle.subCircles.length > 0) {
         circle.subCircles.forEach((subCircle, i) => {
@@ -234,7 +234,7 @@ function CircleVisualization({ representativeId }) {
         });
       }
     };
-    
+
     // Draw all root circles
     circles.forEach((circle, i) => {
       drawCircleHierarchy(circle, 0, i, circles.length, 0, 0, 0);
@@ -244,10 +244,10 @@ function CircleVisualization({ representativeId }) {
   useEffect(() => {
     // Load circles for the representative
     loadCircles();
-    
+
     // Load available users and representatives
     loadAvailableMembers();
-    
+
     // Set up canvas size
     const updateCanvasSize = () => {
       if (canvasRef.current) {
@@ -255,10 +255,10 @@ function CircleVisualization({ representativeId }) {
         setCanvasSize({ width, height });
       }
     };
-    
+
     updateCanvasSize();
     window.addEventListener('resize', updateCanvasSize);
-    
+
     return () => {
       window.removeEventListener('resize', updateCanvasSize);
     };

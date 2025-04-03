@@ -137,7 +137,7 @@ function Hotline() {
           <Typography variant="h5" component="h2">
             Global Hotline: {hotlineNumber}
           </Typography>
-          
+
           <Button
             variant="contained"
             color="primary"
@@ -147,19 +147,19 @@ function Hotline() {
             Make Call
           </Button>
         </Box>
-        
+
         {error && (
           <Alert severity="error" sx={{ mb: 2 }}>
             {error}
           </Alert>
         )}
-        
+
         {callStatus && (
           <Box sx={{ mt: 2 }}>
             <Typography variant="h6" gutterBottom>
               Current Call Status
             </Typography>
-            
+
             {callStatus.status === 'connected' ? (
               <>
                 <Typography>
@@ -190,12 +190,12 @@ function Hotline() {
           </Box>
         )}
       </Paper>
-      
+
       <Paper elevation={3} sx={{ p: 3, mb: 3 }}>
         <Typography variant="h6" gutterBottom>
           Active Calls
         </Typography>
-        
+
         <List>
           {activeCalls.map((call) => (
             <ListItem key={call.callId}>
@@ -220,12 +220,12 @@ function Hotline() {
           )}
         </List>
       </Paper>
-      
+
       <Paper elevation={3} sx={{ p: 3 }}>
         <Typography variant="h6" gutterBottom>
           Call Queue
         </Typography>
-        
+
         <List>
           {callQueue.map((call) => (
             <ListItem key={call.callId}>
@@ -250,13 +250,13 @@ function Hotline() {
           )}
         </List>
       </Paper>
-      
+
       <Dialog open={openDialog} onClose={handleCloseDialog}>
         <Box sx={{ p: 2 }}>
           <Typography variant="h6" gutterBottom>
             Select User
           </Typography>
-          
+
           <TextField
             select
             fullWidth
@@ -271,7 +271,7 @@ function Hotline() {
               </option>
             ))}
           </TextField>
-          
+
           <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1 }}>
             <Button onClick={handleCloseDialog}>
               Cancel
